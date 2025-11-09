@@ -42,16 +42,113 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<h2>Login</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grocery Store - Login</title>
+<style>
+    * {
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
 
-<?php if (!empty($error)) echo "<p style='color:red;'>$error</p>"; ?>
+    body {
+        margin: 0;
+        padding: 0;
+        background: url('https://images.unsplash.com/photo-1603046891741-944cbca5f1f1') no-repeat center center/cover;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-<form method="POST" action="">
-    <label>Username:</label><br>
-    <input type="text" name="username" required><br><br>
+    .login-container {
+        background: rgba(255, 255, 255, 0.92);
+        padding: 40px 50px;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        text-align: center;
+        width: 350px;
+    }
 
-    <label>Password:</label><br>
-    <input type="password" name="password" required><br><br>
+    .login-container h1 {
+        margin-bottom: 20px;
+        color: #2c3e50;
+    }
 
-    <button type="submit">Login</button>
-</form>
+    .login-container label {
+        display: block;
+        text-align: left;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    .login-container input[type="text"],
+    .login-container input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .login-container button {
+        width: 100%;
+        padding: 10px;
+        background-color: #27ae60;
+        border: none;
+        color: white;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .login-container button:hover {
+        background-color: #219150;
+    }
+
+    .error {
+        color: red;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+
+    .footer-text {
+        margin-top: 10px;
+        font-size: 13px;
+        color: #555;
+    }
+</style>
+</head>
+<body>
+
+<div class="login-container">
+    <h1>Welcome to FreshMart 🥦</h1>
+
+    <?php if (!empty($error)) echo "<div class='error'>$error</div>"; ?>
+
+    <form method="POST" action="">
+        <label>Username:</label>
+        <input type="text" name="username" placeholder="Enter your username" required>
+
+        <label>Password:</label>
+        <input type="password" name="password" placeholder="Enter your password" required>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <div class="footer-text">
+        Fresh groceries delivered to your doorstep 🍎
+    </div>
+
+    <div class="footer-link">
+        Don't have an account? <a href="register.php">Register here</a>
+    </div>
+</div>
+
+</body>
