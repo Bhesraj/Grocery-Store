@@ -1,16 +1,16 @@
 <?php
 session_start();
+imp
 
-// Redirect to login if not logged in
+
 if (!isset($_SESSION['username'], $_SESSION['type'])) {
     header("Location: login.php");
     exit;
 }
 
-// DB connection (optional if you need DB data here)
 require_once __DIR__ . '/config/db.php';
 
-// Get user info from session
+
 $username = $_SESSION['username'];
 $type     = $_SESSION['type'];
 ?>
@@ -21,7 +21,7 @@ $type     = $_SESSION['type'];
   <title>Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* Background image */
+  
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -31,7 +31,7 @@ $type     = $_SESSION['type'];
       color: #333;
     }
 
-    /* Light overlay so text is readable */
+   
     .overlay {
       background-color: rgba(255, 255, 255, 0.85);
       min-height: 100vh;
@@ -62,17 +62,26 @@ $type     = $_SESSION['type'];
     .logout-btn {
       background-color: #e74c3c;
       color: #fff;
-      padding: 10px 15px;
+      padding: 100px 100px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
       margin-top: 20px;
     }
     .logout-btn:hover { background-color: #c0392b; }
+    .bj_image {
+      width: 100%;
+      height: 100%;
+    }
   </style>
 </head>
 <body>
+  
   <div class="overlay">
+    <div>
+    <img class="bj_image" src="/images/grocery-bg.jpg" alt="">
+    this is image section
+  </div>
     <div class="container">
       <h2>Welcome, <?php echo htmlspecialchars($username, ENT_QUOTES, 'UTF-8'); ?>!</h2>
       <p>You are logged in as <strong><?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8'); ?></strong>.</p>

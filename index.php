@@ -26,6 +26,7 @@ $type = $_SESSION['type'];
         .container {
             max-width: 800px;
             margin: auto;
+            background-image: url('images/grocery-bg.jpg');
         }
         .logout-btn {
             background-color: #ff4d4d;
