@@ -1,21 +1,6 @@
 <?php
+session_start();
 include('config/db.php');
-
-$message = "";
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = trim($_POST['username']);
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $type = $_POST['type']; 
-
-    $sql = "INSERT INTO users (username, password, type) VALUES ('$username', '$password', '$type')";
-
-    if ($conn->query($sql) === TRUE) {
-        $message = "<span style='color:green;'>Registration successful! <a href='login.php'>Login here</a></span>";
-    } else {
-        $message = "<span style='color:red;'>Error: " . $conn->error . "</span>";
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -23,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grocery Store - Register</title>
+<title>FreshMart - Register</title>
 <style>
     * {
         box-sizing: border-box;
@@ -41,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     .register-container {
-        background: rgba(255, 255, 255, 0.92);
+        background: rgba(255, 255, 255, 0.93);
         padding: 40px 50px;
         border-radius: 20px;
         box-shadow: 0 8px 25px rgba(0,0,0,0.2);
@@ -52,6 +37,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     .register-container h1 {
         margin-bottom: 20px;
         color: #2c3e50;
+    }
+
+    .message {
+        margin-bottom: 15px;
+        font-size: 15px;
+        font-weight: 500;
+        padding: 10px;
+        border-radius: 6px;
+    }
+
+    .message.success {
+        background: #eafaf1;
+        color: #2e7d32;
+        border: 1px solid #a5d6a7;
+    }
+
+    .message.error {
+        background: #fdecea;
+        color: #c62828;
+        border: 1px solid #ef9a9a;
     }
 
     .register-container label {
@@ -88,14 +93,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         background-color: #219150;
     }
 
-    .message {
-        margin-bottom: 15px;
-        font-size: 14px;
-    }
-
     .footer-link {
         font-size: 13px;
-        margin-top: 10px;
+        margin-top: 15px;
     }
 
     .footer-link a {
@@ -114,9 +114,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <div class="register-container">
     <h1>Create Your FreshMart Account 🥬</h1>
 
-    <?php if (!empty($message)) echo "<div class='message'>$message</div>"; ?>
+    <!-- ✅ Display Success/Error Messages -->
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="message success"><?= $_SESSION['success']; ?></div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
 
-    <form method="POST" action="">
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="message error"><?= $_SESSION['error']; ?></div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+
+    <!-- ✅ Registration Form -->
+    <form method="POST" action="register_action.php">
         <label>Username:</label>
         <input type="text" name="username" required>
 
@@ -125,6 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <label>Account Type:</label>
         <select name="type" required>
+            <option value="">Select type</option>
             <option value="customer">Customer</option>
             <option value="shopkeeper">Shopkeeper</option>
         </select>

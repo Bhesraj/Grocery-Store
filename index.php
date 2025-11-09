@@ -130,12 +130,12 @@ $type = $_SESSION['type'];
     <h2><?= ucfirst($type); ?> Panel</h2>
 
     <div class="actions">
-       <a href="products/products/products.php" class="action-card">
+       <a href="products/products.php" class="action-card">
             <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="Browse Products">
             <span>Browse Products</span>
         </a>
 
-        <a href="my_orders.php" class="action-card">
+        <a href="orders/list_orders.php" class="action-card">
             <img src="https://cdn-icons-png.flaticon.com/512/1792/1792512.png" alt="My Orders">
             <span>My Orders</span>
         </a>

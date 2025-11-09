@@ -96,7 +96,7 @@ $type     = $_SESSION['type'];
         <h3>Customer Panel</h3>
         <ul>
           <li><a href="products.php">Browse Products</a></li>
-          <li><a href="my_orders.php">My Orders</a></li>
+          <li><a href="orders/list_orders.php">My Orders</a>
         </ul>
       <?php } ?>
 

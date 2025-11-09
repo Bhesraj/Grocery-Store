@@ -6,11 +6,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sanitize inputs
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
-    $type = $_POST['type'] ?? ''; // should be 'customer' or 'shopkeeper'
+    $type = $_POST['type'] ?? '';
 
     // Basic validation
     if (empty($username) || empty($password) || empty($type)) {
-        $_SESSION['error'] = "All fields are required.";
+        $_SESSION['error'] = "⚠️ All fields are required.";
         header("Location: register.php");
         exit();
     }
@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate role
     $valid_roles = ['customer', 'shopkeeper'];
     if (!in_array($type, $valid_roles)) {
-        $_SESSION['error'] = "Invalid role selected.";
+        $_SESSION['error'] = "⚠️ Invalid account type selected.";
         header("Location: register.php");
         exit();
     }
@@ -30,17 +30,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $check_result = $check_stmt->get_result();
 
     if ($check_result->num_rows > 0) {
-        $_SESSION['error'] = "Username already taken.";
+        $_SESSION['error'] = "⚠️ Username already taken. Please choose another.";
         $check_stmt->close();
         header("Location: register.php");
         exit();
     }
     $check_stmt->close();
 
-    // Hash the password
+    // Hash password securely
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    // Insert into database
+    // Insert new user
     $stmt = $conn->prepare("INSERT INTO users (username, password, type) VALUES (?, ?, ?)");
     $stmt->bind_param("sss", $username, $hashed_password, $type);
 
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: login.php");
         exit();
     } else {
-        $_SESSION['error'] = "Database error: " . $stmt->error;
+        $_SESSION['error'] = "❌ Database error: " . htmlspecialchars($stmt->error);
         header("Location: register.php");
         exit();
     }
@@ -57,3 +57,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->close();
 }
 ?>
+
