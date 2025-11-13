@@ -1,6 +1,9 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'shopkeeper') {
+
+// ✅ Ensure user is logged in and is a shopkeeper
+if (!isset($_SESSION['user_id'], $_SESSION['user_type'], $_SESSION['username']) 
+    || $_SESSION['user_type'] !== 'shopkeeper') {
     header("Location: ../login.php");
     exit();
 }

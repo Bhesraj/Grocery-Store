@@ -1,48 +1,87 @@
 <?php
 session_start();
-if(!isset($_SESSION['username']) || $_SESSION['type'] !== 'customer'){
+include("../config/db.php");
+
+// Only allow customers
+if (!isset($_SESSION['username']) || $_SESSION['user_type'] !== 'customer') {
     header("Location: ../login.php");
     exit();
 }
 
+$username = $_SESSION['username'];
+$user_id = $_SESSION['user_id'];
 $cart = $_SESSION['cart'] ?? [];
 $total = 0;
+$products_in_cart = [];
 
-// When user places order
+// Fetch product details if cart is not empty
+$product_ids = array_filter(array_keys($cart), 'is_numeric');
+
+if (!empty($product_ids)) {
+    $ids = implode(',', $product_ids);
+    $sql = "SELECT * FROM products WHERE id IN ($ids)";
+    $result = $conn->query($sql);
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $products_in_cart[$row['id']] = $row;
+        }
+    } else {
+        die("Database query failed: " . $conn->error);
+    }
+}
+
+// Handle Place Order
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
-    $customer_name = $_SESSION['username'] ?? 'Guest';
-
-    // Create new order
-    $conn->query("INSERT INTO orders (customer_name) VALUES ('$customer_name')");
-    $order_id = $conn->insert_id;
-
-    // Save items
-    foreach ($cart as $id => $item) {
-        $quantity = $item['quantity'];
-        $price_each = $item['price'];
-        $subtotal = $quantity * $price_each;
-
-        $conn->query("INSERT INTO order_items (order_id, product_id, quantity, price_each, subtotal)
-                      VALUES ('$order_id', '$id', '$quantity', '$price_each', '$subtotal')");
+    if (empty($cart)) {
+        $_SESSION['message'] = "Your cart is empty!";
+        header("Location: view_cart.php");
+        exit();
     }
 
-    unset($_SESSION['cart']); // clear cart
+    // Calculate total amount
+    $total_amount = 0;
+    foreach ($cart as $id => $qty) {
+        if (!isset($products_in_cart[$id])) continue;
+        $total_amount += $products_in_cart[$id]['price'] * $qty;
+    }
+
+    $order_date = date('Y-m-d');
+    $created_at = date('Y-m-d H:i:s');
+
+    // Insert order
+    $stmt = $conn->prepare("INSERT INTO orders (user_id, customer_name, total_amount, order_date, created_at) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("isdss", $user_id, $username, $total_amount, $order_date, $created_at);
+    $stmt->execute();
+    $order_id = $stmt->insert_id;
+
+    // Insert order items
+    $stmt_item = $conn->prepare("INSERT INTO order_items (order_id, product_id, quantity, price_each, subtotal) VALUES (?, ?, ?, ?, ?)");
+    foreach ($cart as $id => $qty) {
+        if (!isset($products_in_cart[$id])) continue;
+        $product = $products_in_cart[$id];
+        $price_each = $product['price'];
+        $subtotal = $price_each * $qty;
+        $stmt_item->bind_param("iiidd", $order_id, $id, $qty, $price_each, $subtotal);
+        $stmt_item->execute();
+    }
+
+    unset($_SESSION['cart']); // Clear cart
     header("Location: ../orders/list_orders.php");
-    exit;
+    exit();
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Your Cart</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<meta charset="UTF-8">
+<title>Your Cart - FreshMart</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 <div class="container mt-5 bg-white p-4 rounded shadow">
-    <h2 class="text-center mb-4">🛒 Your Cart</h2>
+    <h2 class="text-center mb-4">🛒 <?= htmlspecialchars($username); ?>'s Cart</h2>
 
-    <?php if (!empty($cart)): ?>
+    <?php if (!empty($cart) && !empty($products_in_cart)): ?>
         <form method="POST">
             <table class="table table-bordered text-center align-middle">
                 <thead class="table-success">
@@ -51,43 +90,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                         <th>Price (Rs.)</th>
                         <th>Quantity</th>
                         <th>Subtotal</th>
-                        <th>Action</th> <!-- ✅ Added column for remove -->
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($cart as $id => $item): 
-                        $subtotal = $item['price'] * $item['quantity'];
-                        $total += $subtotal;
-                    ?>
-                        <tr>
-                            <td><?= htmlspecialchars($item['name']); ?></td>
-                            <td><?= number_format($item['price'], 2); ?></td>
-                            <td><?= $item['quantity']; ?></td>
-                            <td><?= number_format($subtotal, 2); ?></td>
-                            <td>
-                                <!-- ✅ Remove button -->
-                                <a href="remove_cart.php?id=<?= urlencode($id); ?>" 
-                                   class="btn btn-outline-danger btn-sm"
-                                   onclick="return confirm('Are you sure you want to remove this item?');">
-                                    ❌ Remove
-                                </a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
+                <?php foreach ($cart as $id => $qty):
+                    if (!isset($products_in_cart[$id])) continue;
+                    $product = $products_in_cart[$id];
+                    $subtotal = $product['price'] * $qty;
+                    $total += $subtotal;
+                ?>
+                    <tr>
+                        <td><?= htmlspecialchars($product['product_name']); ?></td>
+                        <td>₹ <?= number_format($product['price'], 2); ?></td>
+                        <td><?= $qty; ?></td>
+                        <td>₹ <?= number_format($subtotal, 2); ?></td>
+                        <td>
+                            <a href="remove_cart.php?id=<?= urlencode($id); ?>" class="btn btn-outline-danger btn-sm"
+                               onclick="return confirm('Remove this item?');">❌ Remove</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
                 </tbody>
             </table>
 
             <div class="text-end">
-                <h4>Total: Rs. <?= number_format($total, 2); ?></h4>
+                <h4>Total: ₹ <?= number_format($total, 2); ?></h4>
                 <button type="submit" name="place_order" class="btn btn-success mt-3">✅ Place Order</button>
             </div>
         </form>
     <?php else: ?>
-        <div class="alert alert-warning text-center">Your cart is empty!</div>
+        <div class="alert alert-warning text-center">
+            Your cart is empty! <a href="products.php" class="btn btn-sm btn-primary ms-2">Browse Products</a>
+        </div>
     <?php endif; ?>
 
     <div class="text-center mt-4">
-        <a href="products.php" class="btn btn-secondary">⬅ Continue Shopping</a>
+        <a href="../dashboard.php" class="btn btn-secondary">← Back to Dashboard</a>
     </div>
 </div>
 </body>

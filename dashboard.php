@@ -23,43 +23,82 @@ body {
     background: url('images/grocery-bg.jpg') no-repeat center center fixed;
     background-size: cover;
     color: #333;
+    min-height: 100vh;
 }
+
+/* Overlay for better readability */
 .overlay {
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(0, 0, 0, 0.5); /* dark semi-transparent overlay */
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 24px;
 }
+
+/* Central container */
 .container {
     width: 100%;
     max-width: 900px;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.95); /* slightly transparent */
     padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
     text-align: center;
+    backdrop-filter: blur(5px); /* nice blur effect behind container */
 }
+
 h2 { color: #2c3e50; margin-bottom: 10px; }
 h3 { color: #34495e; margin: 20px 0 10px; }
-ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; }
+
+ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
 ul li { margin: 10px; }
+
 a.button {
     display: inline-block;
-    padding: 12px 25px;
+    padding: 14px 28px;
     text-decoration: none;
-    border-radius: 6px;
+    border-radius: 12px;
     font-weight: bold;
     color: #fff;
-    transition: background 0.3s;
+    transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    font-size: 16px;
 }
+
+/* Shopkeeper buttons */
 .shopkeeper { background: #27ae60; }
-.shopkeeper:hover { background: #219150; }
+.shopkeeper:hover {
+    background: #219150;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.3);
+}
+
+/* Customer buttons */
 .customer { background: #3498db; }
-.customer:hover { background: #2980b9; }
-.logout { background: #e74c3c; margin-top: 20px; }
-.logout:hover { background: #c0392b; }
+.customer:hover {
+    background: #2980b9;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.3);
+}
+
+/* Logout button */
+.logout {
+    background: #e74c3c;
+    margin-top: 20px;
+}
+.logout:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+}
 </style>
 </head>
 <body>
@@ -79,8 +118,8 @@ a.button {
         <?php elseif ($user_type === 'customer'): ?>
             <h3>Customer Panel</h3>
             <ul>
-                <li><a href="products.php" class="button customer">Browse Products</a></li>
-                <li><a href="cart.php" class="button customer">View Cart</a></li>
+                <li><a href="customer/products.php" class="button customer">Browse Products</a></li>
+                <li><a href="customer/view_cart.php" class="button customer">🛒 View Cart</a></li>
                 <li><a href="orders/list_orders.php" class="button customer">My Orders</a></li>
             </ul>
         <?php else: ?>

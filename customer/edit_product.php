@@ -1,6 +1,9 @@
 <?php
-include("../config/db.php");
 session_start();
+if(!isset($_SESSION['username']) || $_SESSION['type'] !== 'customer'){
+    header("Location: ../login.php");
+    exit();
+}
 
 $id = $_GET['id'];
 $sql = "SELECT * FROM products WHERE id='$id'";

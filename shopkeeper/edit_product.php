@@ -1,6 +1,9 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'shopkeeper') {
+
+// ✅ Ensure user is logged in and is a shopkeeper
+if (!isset($_SESSION['user_id'], $_SESSION['user_type'], $_SESSION['username']) 
+    || $_SESSION['user_type'] !== 'shopkeeper') {
     header("Location: ../login.php");
     exit();
 }
@@ -60,8 +63,22 @@ body {
     background-size: cover;
     color: #333;
 }
-.overlay { background-color: rgba(255,255,255,0.85); min-height:100vh; display:flex; justify-content:center; align-items:center; padding:40px 20px; }
-.container { width:100%; max-width:500px; background:#fff; padding:30px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.2); }
+.overlay { 
+    background-color: rgba(255,255,255,0.85); 
+    min-height:100vh; 
+    display:flex; 
+    justify-content:center; 
+    align-items:center; 
+    padding:40px 20px; 
+}
+.container { 
+    width:100%; 
+    max-width:500px; 
+    background:#fff; 
+    padding:30px; 
+    border-radius:12px; 
+    box-shadow:0 4px 15px rgba(0,0,0,0.2); 
+}
 h2 { color:#2c3e50; margin-bottom:20px; text-align:center; }
 input[type=text], input[type=number] { width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; border-radius:8px; }
 button { width:100%; padding:10px; background:#2980b9; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer; }

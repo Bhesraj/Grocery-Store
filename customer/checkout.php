@@ -1,6 +1,9 @@
 <?php
 session_start();
-include("../config/db.php");
+if(!isset($_SESSION['username']) || $_SESSION['type'] !== 'customer'){
+    header("Location: ../login.php");
+    exit();
+}
 
 if (!isset($_SESSION['user_id'])) {
     die("Please log in first.");

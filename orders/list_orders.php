@@ -13,13 +13,13 @@ $is_admin = $_SESSION['is_admin'] ?? false;
 
 // Fetch orders: all for admin, user-specific otherwise
 if ($is_admin) {
-    $sql = "SELECT o.*, u.name AS user_name 
+    $sql = "SELECT o.*, u.username AS user_name 
             FROM orders o 
             LEFT JOIN users u ON o.user_id = u.id 
             ORDER BY o.id DESC";
     $stmt = $conn->prepare($sql);
 } else {
-    $sql = "SELECT o.*, u.name AS user_name 
+    $sql = "SELECT o.*, u.username AS user_name 
             FROM orders o 
             LEFT JOIN users u ON o.user_id = u.id 
             WHERE o.user_id = ? 
@@ -66,9 +66,10 @@ $result = $stmt->get_result();
             <tr>
                 <th>ID</th>
                 <th>User</th>
+                <th>Customer Name</th>
                 <th>Total (Rs.)</th>
-                <th>Status</th>
-                <th>Date</th>
+                <th>Order Date</th>
+                <th>Created At</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -76,11 +77,12 @@ $result = $stmt->get_result();
         <?php if ($result->num_rows > 0): ?>
             <?php while($row = $result->fetch_assoc()): ?>
                 <tr>
-                    <td><?= htmlspecialchars($row['id']); ?></td>
+                    <td><?= $row['id']; ?></td>
                     <td><?= htmlspecialchars($row['user_name'] ?? '—'); ?></td>
-                    <td><?= htmlspecialchars($row['total_amount']); ?></td>
-                    <td><?= htmlspecialchars($row['status']); ?></td>
-                    <td><?= htmlspecialchars($row['created_at'] ?? '—'); ?></td>
+                    <td><?= htmlspecialchars($row['customer_name']); ?></td>
+                    <td>₹ <?= number_format($row['total_amount'], 2); ?></td>
+                    <td><?= htmlspecialchars($row['order_date']); ?></td>
+                    <td><?= htmlspecialchars($row['created_at']); ?></td>
                     <td>
                         <a href="view_order.php?id=<?= urlencode($row['id']); ?>" class="btn btn-sm btn-primary">
                             View
@@ -89,10 +91,14 @@ $result = $stmt->get_result();
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
-            <tr><td colspan="6">No orders found.</td></tr>
+            <tr><td colspan="7">No orders found.</td></tr>
         <?php endif; ?>
         </tbody>
     </table>
+
+    <div class="text-center mt-4">
+        <a href="../dashboard.php" class="btn btn-success">← Back to Dashboard</a>
+    </div>
 </div>
 </body>
 </html>
