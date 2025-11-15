@@ -31,7 +31,7 @@ if (isset($_POST['add_to_cart'])) {
 
 // Fetch products
 $search = isset($_GET['search']) ? trim($_GET['search']) : "";
-$sql = "SELECT id, name, price, image FROM products WHERE name LIKE ?";
+$sql = "SELECT id, product_name, price, image FROM products WHERE product_name LIKE ?";
 $stmt = $conn->prepare($sql);
 $searchTerm = "%$search%";
 $stmt->bind_param("s", $searchTerm);
@@ -153,7 +153,7 @@ $result = $stmt->get_result();
 
 <div class="container">
 
-    <a href="../customer/dashboard.php" class="back-btn">⬅ Back to Dashboard</a>
+    <a href="../dashboard.php" class="back-btn">⬅ Back to Dashboard</a>
 
     <h2>Browse Products</h2>
 
@@ -173,7 +173,7 @@ $result = $stmt->get_result();
             <div class="product-card">
                 <img src="../uploads/<?= $row['image']; ?>" alt="Product">
 
-                <h3><?= htmlspecialchars($row['name']); ?></h3>
+                <h3><?= htmlspecialchars($row['product_name']); ?></h3>
                 <p class="price">Rs. <?= number_format($row['price']); ?></p>
 
                 <form method="POST">

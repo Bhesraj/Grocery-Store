@@ -1,18 +1,19 @@
 <?php
 session_start();
-if(!isset($_SESSION['username']) || $_SESSION['type'] !== 'customer'){
+
+// Only allow customers
+if (!isset($_SESSION['username']) || $_SESSION['user_type'] !== 'customer') {
     header("Location: ../login.php");
     exit();
 }
-if (isset($_GET['id']) && isset($_SESSION['cart'])) {
-    foreach ($_SESSION['cart'] as $index => $item) {
-        if ($item['id'] == $_GET['id']) {
-            unset($_SESSION['cart'][$index]);
-            $_SESSION['cart'] = array_values($_SESSION['cart']); // reindex
-            break;
-        }
-    }
+
+// Remove product if id is passed and exists in cart
+if (isset($_GET['id']) && isset($_SESSION['cart'][$_GET['id']])) {
+    $product_id = $_GET['id'];
+    unset($_SESSION['cart'][$product_id]);
 }
+
+// Redirect back to cart page
 header("Location: view_cart.php");
 exit();
 ?>
