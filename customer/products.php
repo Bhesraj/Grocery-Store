@@ -1,6 +1,7 @@
 <?php
 session_start();
 include("../config/db.php");
+include("recommend.php"); // CBF integration
 
 // Allow only customers
 if (!isset($_SESSION['user_id'], $_SESSION['user_type']) || $_SESSION['user_type'] !== 'customer') {
@@ -13,12 +14,10 @@ if (isset($_POST['add_to_cart'])) {
     $product_id = intval($_POST['product_id']);
     $quantity = intval($_POST['quantity']);
 
-    // Initialize cart array in session
     if (!isset($_SESSION['cart'])) {
         $_SESSION['cart'] = [];
     }
 
-    // If product exists, increase quantity
     if (isset($_SESSION['cart'][$product_id])) {
         $_SESSION['cart'][$product_id] += $quantity;
     } else {
@@ -37,6 +36,14 @@ $searchTerm = "%$search%";
 $stmt->bind_param("s", $searchTerm);
 $stmt->execute();
 $result = $stmt->get_result();
+
+// ---- CBF Logic ----
+$recommendations = [];
+$view_product_id = isset($_GET['view_id']) ? intval($_GET['view_id']) : 0;
+
+if ($view_product_id > 0) {
+    $recommendations = getRecommendations($view_product_id, $conn, 4);
+}
 ?>
 
 <!DOCTYPE html>
@@ -85,6 +92,7 @@ $result = $stmt->get_result();
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 20px;
+        margin-top: 15px;
     }
 
     .product-card {
@@ -147,8 +155,8 @@ $result = $stmt->get_result();
         margin-bottom: 20px;
     }
 </style>
-
 </head>
+
 <body>
 
 <div class="container">
@@ -168,6 +176,29 @@ $result = $stmt->get_result();
         </form>
     </div>
 
+    <!-- CBF Recommendation Section -->
+    <?php if (!empty($recommendations)): ?>
+        <h3 style="color:#2a7a2e;">Similar Products</h3>
+
+        <div class="product-grid">
+            <?php foreach ($recommendations as $item): ?>
+                <?php $p = $item['product']; ?>
+                <div class="product-card">
+                    <img src="../uploads/<?= $p['image']; ?>" alt="Product">
+                    <h3><?= htmlspecialchars($p['product_name']); ?></h3>
+                    <p class="price">Rs. <?= number_format($p['price']); ?></p>
+                    <p style="font-size:14px;color:#666;">
+                        Similarity: <?= round($item['similarity'], 1); ?>%
+                    </p>
+                    <a href="products.php?view_id=<?= $p['id']; ?>" class="add-btn" style="text-decoration:none;">
+                        View Similar
+                    </a>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+
+    <!-- Main Product List -->
     <div class="product-grid">
         <?php while ($row = $result->fetch_assoc()): ?>
             <div class="product-card">
@@ -175,6 +206,11 @@ $result = $stmt->get_result();
 
                 <h3><?= htmlspecialchars($row['product_name']); ?></h3>
                 <p class="price">Rs. <?= number_format($row['price']); ?></p>
+
+                <a href="products.php?view_id=<?= $row['id']; ?>" 
+                   style="display:block;margin:8px 0;color:#2a7a2e;font-weight:bold;">
+                    View Similar Products
+                </a>
 
                 <form method="POST">
                     <input type="hidden" name="product_id" value="<?= $row['id']; ?>">
